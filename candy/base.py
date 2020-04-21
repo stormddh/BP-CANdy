@@ -91,11 +91,10 @@ class Core:
         # INSECURE STUFF
         if index != 0:
             module = importlib.import_module(
-                f".{self.modules[index]}",
+                f".{self.modules[index - 1]}",
                 package='modules',
             )
 
             module.run(module.candyAPI.API(self.db, self.bus))
         else:
             self.console()
-
