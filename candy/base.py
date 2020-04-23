@@ -15,7 +15,7 @@ class Core:
         self.bus = None
         self.definitions = None
 
-    def can_monitor(self, interface, user_callback):
+    def can_monitor(self, interface, user_callback=[]):
         print(">> Starting monitoring session")
         callback = [ self.db.save_message ]
         callback.extend(user_callback)

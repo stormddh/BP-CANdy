@@ -9,6 +9,7 @@ def my_print(msg):
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--interface", help="SocketCAN interface name",)
 parser.add_argument("-l", "--log", help="Import log file",)
+parser.add_argument("-v", "--verbose", help="Print incoming messages to the console", action="store_true")
 args = parser.parse_args()
 
 # ----------------------------- MAIN ----------------------------- 
@@ -23,7 +24,10 @@ if not (args.interface or args.log):
     sys.exit(1)
 
 if args.interface:
-    candy.can_monitor(args.interface, [ my_print ])
+    if args.verbose:
+        candy.can_monitor(args.interface, [ my_print ])
+    else:
+        candy.can_monitor(args.interface)
 
 if args.log:
     candy.can_offline(args.log)
