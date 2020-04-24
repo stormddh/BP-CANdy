@@ -4,6 +4,9 @@ class API:
         self.db = messages
         self.bus = bus
 
+    def create_data(self, msg):
+        return [int(x, 16) for x in msg]
+
     def get_messages(self, msg_id=None):
         if msg_id:
             print(self.db.messages[msg_id])
@@ -14,14 +17,14 @@ class API:
             return self.db.messages
 
     def send_message(self, msg_id, msg_data):
-        self.bus.send_message(msg_id, msg_data)
+        self.bus.send_message(msg_id, self.create_data(msg_data))
 
     def send_periodic_time(self, msg_id, msg_data, period, limit=0):
-        self.bus.send_message_periodic(msg_id, msg_data, period, limit)
+        self.bus.send_message_periodic(msg_id, self.create_data(msg_data), period, limit)
 
     def send_periodic_count(self, msg_id, msg_data, period, number):
         limit = period * number
-        self.bus.send_message_periodic(msg_id, msg_data, period, limit)
+        self.bus.send_message_periodic(msg_id, self.create_data(msg_data), period, limit)
 
     def set_filter_rule(self, msg_id, mask, extended=False):
         rule = { "can_id" : msg_id,

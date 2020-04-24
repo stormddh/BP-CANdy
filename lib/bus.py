@@ -75,6 +75,6 @@ class Bus():
         asyncio.run(self.listen(callback))
 
     def stop(self):
-        print('>> Done!')
+        print('>> Exiting...')
         self.notifier.stop()
         self.can_bus.shutdown()

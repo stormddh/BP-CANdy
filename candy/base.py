@@ -20,7 +20,7 @@ class Core:
         callback = [ self.db.save_message ]
         callback.extend(user_callback)
         self.bus = Bus(interface)
-        
+
         # Create CAN bus deamon in a new thread
         worker = Thread(
             target=self.bus.start,
@@ -32,7 +32,7 @@ class Core:
     def can_offline(self, log_file):
         print(">> Importing data")
         log_data = CanutilsLogReader(log_file)
-        
+
         for msg in log_data:
             self.db.save_message(msg)
         for msg in self.db.messages:
@@ -40,23 +40,29 @@ class Core:
 
     def console(self):
         candy = API(self.db, self.bus)
-        
+
         while True:
-            command = input(">> ")
+            user = input("candy> ").split()
+            if len(user) == 0:
+                print("use help for commands")
+                continue
+
+            command = user.pop(0)
             if command == "help":
-                print("Help:")
-                print("\tget")
-                print("\tsend")
-                print("\tquit")
+                sep = '\t'
+                print("Commands:")
+                print(f"\tget{3*sep}- get received all messages")
+                print(f"\tsend <id> <data>{sep}- send message (use HEX values)")
+                print(f"\tfilter <id> <mask>{sep}- set filter (use HEX values)")
+                print(f"\tquit{3*sep}- exit application")
             elif command == "get":
                 candy.get_messages()
             elif command == "send":
-                candy.send_message(msg)
+                candy.send_message(int(user[0], 16), user[1])
+            elif command == "filter":
+                candy.set_filter_rule(int(user[0], 16), int(user[1], 16))
             elif command == "quit":
                 break
-            elif command == "":
-                print("use help for commands")
-                continue
             else:
                 print("Invalid input")
 
@@ -66,7 +72,7 @@ class Core:
             for finder, name, ispkg
             in pkgutil.iter_modules(path=["./modules"])
         ]
-        
+
         print(">> Found modules:")
         for number, name in enumerate(self.modules, 1):
             print(number, name)
