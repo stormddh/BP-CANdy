@@ -10,16 +10,39 @@ from lib.message import Messages
 
 class Core:
     def __init__(self):
-        self.modules = []
-        self.db = Messages()
-        self.bus = None
-        self.definitions = None
+        self._modules = []
+        self._db = Messages()
+        self._bus = None
 
-    def can_monitor(self, interface, user_callback=[]):
+    @property
+    def modules(self):
+        return self._modules
+
+    @modules.setter
+    def modules(self, value):
+        self._modules = value
+
+    @property
+    def db(self):
+        return self._db
+
+    @db.setter
+    def db(self, value):
+        self._db = value
+
+    @property
+    def bus(self):
+        return self._bus
+
+    @bus.setter
+    def bus(self, value):
+        self._bus = value
+
+    def can_monitor(self, interface, bitrate, user_callback=[]):
         print(">> Starting monitoring session")
         callback = [ self.db.save_message ]
         callback.extend(user_callback)
-        self.bus = Bus(interface)
+        self.bus = Bus(interface, bitrate)
 
         # Create CAN bus deamon in a new thread
         worker = Thread(

@@ -4,18 +4,39 @@ import time
 from datetime import datetime
 
 class Bus():
-    def __init__(self, interface="vcan0"):
-        self.nodes = []
-        self.can_bus = can.ThreadSafeBus(
+    def __init__(self, interface, br):
+        self._can_bus = can.ThreadSafeBus(
             bustype="socketcan",
             channel=interface,
-            bitrate=500000,
+            bitrate=br,
             receive_own_messages=True,
         )
-        self.filter_rules = []
-        self.loop = None
-        self.notifier = None
-        self.end = False
+        self._filter_rules = []
+        self._nodes = []
+        self._loop = None
+        self._notifier = None
+        self._end = False
+
+    @property
+    def can_bus(self):
+        return self._can_bus
+
+    @property
+    def filter_rules(self):
+        return self._filter_rules
+
+    @filter_rules.setter
+    def filter_rules(self):
+        return self._filter_rules
+
+    @property
+    def nodes(self):
+        return self._nodes
+
+    @nodes.setter
+    def nodes(self, value):
+        self._nodes = value
+
 
     def send_message(self, msg_id, msg_data):
         try:
@@ -47,13 +68,12 @@ class Bus():
 
     async def listen(self, callback):
         reader = can.AsyncBufferedReader()
-        # TODO: add date and time of log
         logger = can.Logger(f"log/{datetime.now().isoformat(timespec='seconds')}.log")
 
         # Set up listeners and add callback functions
         listeners = [
             reader,         # AsyncBufferedReader() listener
-            logger          # Regular Listener object
+            logger,         # Regular Listener object
         ]
         listeners.extend(callback)
 

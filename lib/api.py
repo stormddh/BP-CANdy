@@ -1,8 +1,24 @@
 class API:
 
     def __init__(self, messages, bus):
-        self.db = messages
-        self.bus = bus
+        self._db = messages
+        self._bus = bus
+
+    @property
+    def db(self):
+        return self._db
+
+    @db.setter
+    def db(self, value):
+        self._db = value
+
+    @property
+    def bus(self):
+        return self._bus
+
+    @bus.setter
+    def bus(self, value):
+        self._bus = value
 
     def create_data(self, msg):
         return [int(x, 16) for x in msg]
@@ -13,7 +29,7 @@ class API:
             return self.db.messages[msg_id]
         else:
             for msg in self.db.messages:
-                print(msg, self.db.messages[msg])
+                print("ID:", hex(msg))
             return self.db.messages
 
     def send_message(self, msg_id, msg_data):

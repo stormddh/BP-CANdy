@@ -8,6 +8,11 @@ if [ ! -d __venv ]; then
 		exit 1
 	fi
 fi
+
+if [ ! -d log ]; then
+	mkdir log
+fi
+
 source __venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
