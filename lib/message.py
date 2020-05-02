@@ -6,6 +6,7 @@ class Messages:
     def __init__(self):
         self._messages = {}
         self._definitions = None
+        self._import_file = None
 
     @property
     def messages(self):
@@ -23,11 +24,18 @@ class Messages:
     def definitions(self, value):
         self._definitions = value
 
+    @property
+    def import_file(self):
+        return self._import_file
+
+    @import_file.setter
+    def import_file(self, value):
+        self.self._import_file = value
+
     def save_message(self, msg):
         if msg.arbitration_id not in self.messages:
             self.messages[msg.arbitration_id] = dict()
-            for i in range(8):
-                # not really memory efficient
+            for i in range(len(msg.data)):
                 self.messages[msg.arbitration_id][i] = set()
         data = bytes(msg.data)
         for i in range(len(data)):
@@ -39,6 +47,9 @@ class Messages:
 
     def import_definitions(self, filename):
         self.definitions = cantools.database.load_file(filename)
+
+    def decode_message(self, msg_id, msg_data):
+        return self.definitions.decode_message(msg_id, msg_data)
 
     def export_messages():
         pass

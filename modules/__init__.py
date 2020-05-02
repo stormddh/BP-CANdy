@@ -1,2 +1,1 @@
-print("Loading user module")
 

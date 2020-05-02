@@ -6,7 +6,6 @@ from can import CanutilsLogReader
 from lib.api import API
 from lib.bus import Bus
 from lib.message import Messages
-#from lib.definitions import Definition
 
 class Core:
     def __init__(self):
@@ -39,7 +38,7 @@ class Core:
         self._bus = value
 
     def can_monitor(self, interface, bitrate, user_callback=[]):
-        print(">> Starting monitoring session")
+        print(f"Starting monitoring session on { interface }")
         callback = [ self.db.save_message ]
         callback.extend(user_callback)
         self.bus = Bus(interface, bitrate)
@@ -58,36 +57,14 @@ class Core:
 
         for msg in log_data:
             self.db.save_message(msg)
-        for msg in self.db.messages:
-            print("ID: ", msg, self.db.messages[msg])
+        for msg in sorted(self.db.messages):
+            print("ID: ", msg)
+            for i in self.db.messages[msg]:
+                if len(self.db.messages[msg][i]):
+                    print(i, self.db.messages[msg][i], "; ", end="")
+            print()
 
-    def console(self):
-        candy = API(self.db, self.bus)
-
-        while True:
-            user = input("candy> ").split()
-            if len(user) == 0:
-                print("use help for commands")
-                continue
-
-            command = user.pop(0)
-            if command == "help":
-                sep = '\t'
-                print("Commands:")
-                print(f"\tget{3*sep}- get received all messages")
-                print(f"\tsend <id> <data>{sep}- send message (use HEX values)")
-                print(f"\tfilter <id> <mask>{sep}- set filter (use HEX values)")
-                print(f"\tquit{3*sep}- exit application")
-            elif command == "get":
-                candy.get_messages()
-            elif command == "send":
-                candy.send_message(int(user[0], 16), user[1])
-            elif command == "filter":
-                candy.set_filter_rule(int(user[0], 16), int(user[1], 16))
-            elif command == "quit":
-                break
-            else:
-                print("Invalid input")
+        self.db.import_file = log_file
 
     def find_plugin(self):
         self.modules = [
@@ -95,35 +72,16 @@ class Core:
             for finder, name, ispkg
             in pkgutil.iter_modules(path=["./modules"])
         ]
+        return self.modules
 
-        print(">> Found modules:")
-        for number, name in enumerate(self.modules, 1):
-            print(number, name)
-        print("0 default console mode")
-
-    def run_plugin(self):
-        while(1):
-            try:
-                index = int(input(">> Choose module: "))
-                if index - 1 in range(0, len(self.modules)) or not index:
-                    break
-                else:
-                    print("Number out of range")
-            except ValueError:
-                print("Invalid input")
-
-        #try:
-        #except Exception as e:
-        #    print("Plugin does not work properly")
-        #    print(e)
-
-        # INSECURE STUFF
-        if index != 0:
+    def run_plugin(self, index):
+        try:
             module = importlib.import_module(
-                f".{self.modules[index - 1]}",
+                f".{self.modules[index]}",
                 package='modules',
             )
 
-            module.run(module.candyAPI.API(self.db, self.bus))
-        else:
-            self.console()
+            module.run(module.candyAPI.API(self))
+
+        except Exception as e:
+            print("Plugin does not work properly:", e)
