@@ -5,10 +5,11 @@ from lib.cli import CandyCLI
 
 # Argument parser
 parser = argparse.ArgumentParser()
-parser.add_argument("-i", "--interface", help="SocketCAN interface name",)
-parser.add_argument("-l", "--log", help="Import log file",)
+parser.add_argument("-i", "--interface", help="SocketCAN interface name")
+parser.add_argument("-l", "--log", help="Import log file")
+parser.add_argument("-o", "--out", help="Log CAN messages from the session", action="store_true")
 parser.add_argument("-q", "--quiet", help="Hide incoming messages", action="store_true")
-parser.add_argument("-b", "--bitrate", help="CAN bus channel bitrate (default 500000",)
+parser.add_argument("-b", "--bitrate", help="CAN bus channel bitrate (default 500000")
 args = parser.parse_args()
 
 # ----------------------------- MAIN -----------------------------

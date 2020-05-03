@@ -75,13 +75,13 @@ class Core:
         return self.modules
 
     def run_plugin(self, index):
-        try:
-            module = importlib.import_module(
-                f".{self.modules[index]}",
-                package='modules',
-            )
+        #try:
+        module = importlib.import_module(
+            f".{self.modules[index]}",
+            package='modules',
+        )
 
-            module.run(module.candyAPI.API(self))
+        module.run(module.candyAPI.API(self))
 
-        except Exception as e:
-            print("Plugin does not work properly:", e)
+        #except Exception as e:
+        #    print("Plugin does not work properly:", e)

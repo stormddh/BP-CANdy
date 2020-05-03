@@ -118,6 +118,8 @@ class Bus():
         self.can_bus.shutdown()
 
     def find_nodes(self, file_name):
-        # import from communication
-        self.nodes = canvas.mapper(file_name)
+        try:
+            self.nodes = canvas.mapper(file_name)
+        except:
+            ("Something went wrong with CANvas")
         return self.nodes

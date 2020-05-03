@@ -1,7 +1,6 @@
 import lib.canvas.source.mapper
 
 class API:
-
     def __init__(self, core):
         self._db = core.db
         self._bus = core.bus
@@ -46,9 +45,15 @@ class API:
             except KeyError:
                 return None
         else:
-            for msg in sorted(self.db.messages):
-                print("ID:", hex(msg))
             return self.db.messages
+
+    def get_message_log(self, msg_id):
+        result = []
+        for m in self._bus.history:
+            if m.arbitration_id == msg_id:
+                result.append(m)
+
+        return result
 
     def send_message(self, msg_id, msg_data):
         self.bus.send_message(msg_id, self.create_data(msg_data))
@@ -71,11 +76,13 @@ class API:
                  "can_mask" : mask,
                  "extended" : extended,
             }
-        self.bus.filter_rules.append(rule)
+        if rule not in self.bus.filter_rules:
+            self.bus.filter_rules.append(rule)
         self.bus.can_bus.set_filters(self.bus.filter_rules)
 
     def reset_filter(self):
         self.bus.can_bus.set_filters(None)
+        self.bus.filter_rules.clear()
 
     def get_nodes(self):
         return self.bus.nodes()

@@ -2,7 +2,6 @@ import can
 import cantools
 
 class Messages:
-
     def __init__(self):
         self._messages = {}
         self._definitions = None
@@ -35,11 +34,15 @@ class Messages:
     def save_message(self, msg):
         if msg.arbitration_id not in self.messages:
             self.messages[msg.arbitration_id] = dict()
+            self.messages[msg.arbitration_id]['data'] = []
+            self.messages[msg.arbitration_id]['count'] = 0
             for i in range(len(msg.data)):
-                self.messages[msg.arbitration_id][i] = set()
+                self.messages[msg.arbitration_id]['data'].append(set())
+
+        self.messages[msg.arbitration_id]['count'] += 1
         data = bytes(msg.data)
         for i in range(len(data)):
-            self.messages[msg.arbitration_id][i].add(data[i])
+            self.messages[msg.arbitration_id]['data'][i].add(data[i])
 
     def import_messages(self, filename):
         for msg in can.CanutilsLogReader(filename):

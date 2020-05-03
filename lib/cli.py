@@ -62,28 +62,53 @@ class CandyCLI(cmd.Cmd):
     def do_get(self, arg):
         """get <id:optional> - List all received messages or one message with details"""
         if arg:
-            msg = candyAPI.get_messages(int(arg[0], 16))
-            print(f"ID: { user[0] }")
-            print("Signals:")
-            for field in msg:
-                print(f"{ field }: { sorted(msg[field]) }")
+            msg = self.candy_API.get_messages(int(arg, 16))
+            if msg:
+                print(f"ID: { int(arg, 16) }")
+                print(f"Count: { msg['count'] }")
+                print("Signals:")
+                for num, field in enumerate(msg['data']):
+                    print(f"{ num }: { sorted(field) }")
+            else:
+                print("Message not found")
         else:
-            for msg in sorted(candyAPI.get_messages()):
-                print("ID:", hex(msg))
+            messages = self.candy_API.get_messages()
+            for m in messages.keys():
+                #print(messages[m])
+                print(f"ID: { hex(m) } ({ messages[m]['count'] })")
+            print("=================")
+            print(f"{ len(messages.keys()) } unique IDs")
 
     def do_send(self, arg):
         """send <id> <data> - Send a CAN message (use HEX values)"""
         args = parse(arg)
+        if not args:
+            print("Missing arguments")
+            return
         self.candy_API.send_message(int(args[0], 16), args[1])
 
     def do_filter(self, arg):
-        """filter <id> <mask> - Set filter (use HEX values)"""
+        """filter <id> <mask> or 'reset' - Set filter (use HEX values, default mask is xFFFFF)"""
         args = parse(arg)
-        self.candy_API.set_filter_rule(int(args[0], 16), int(args[1], 16))
+        if not args:
+            for f in self.candy_API.bus.filter_rules:
+                print(f"CAN ID: { hex(f['can_id']) }, MASK: { hex(f['can_mask']) }")
+        elif args[0] == "reset":
+            self.candy_API.reset_filter()
+        else:
+            if len(args) > 1:
+                mask = int(args[1], 16)
+            else:
+                mask = 0xFFFFF
+            self.candy_API.set_filter_rule(int(args[0], 16), mask)
 
     def do_import(self, arg):
         """import <file> - Import CAN message definitions"""
-        self.candy_core.db.import_definitions(user[0])
+        args = parse(arg)
+        if not args:
+            print("Missing arguments")
+            return
+        self.candy_core.db.import_definitions(args[0])
 
     def do_mod(self, arg):
         """mod <name:optional>- Run user module or list available modules"""
@@ -91,9 +116,12 @@ class CandyCLI(cmd.Cmd):
             print("Modules:")
             for number, name in enumerate(self.candy_core.modules, 1):
                 print(f"\t{ number } { name }")
-            index = input("Choose module: ")
+            index = input("Choose module #: ")
         elif arg in self.candy_core.modules:
             self.candy_core.run_plugin(self.candy_core.modules.index(arg))
+            return
+        else:
+            print(f"Module '{arg}' does not exist")
             return
 
         try:
@@ -109,8 +137,6 @@ class CandyCLI(cmd.Cmd):
         if self.interface:
             self.candy_core.bus.stop()
         return True
-
-    # ----- cmd methods -----
 
 # Helper functions
 def parse(arg):
