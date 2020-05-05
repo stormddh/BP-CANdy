@@ -1,6 +1,36 @@
 import can
 import cantools
 
+class Message:
+    def __init__(self):
+        self._count = 0
+        self._data = []
+        self._label = ""
+
+    @property
+    def count(self):
+        return self._count
+
+    @count.setter
+    def count(self, value):
+        self._count = value
+
+    @property
+    def data(self):
+        return self._data
+
+    @data.setter
+    def data(self, value):
+        self._data = value
+
+    @property
+    def label(self):
+        return self._label
+
+    @label.setter
+    def label(self, value):
+        self._label = value
+
 class Messages:
     def __init__(self):
         self._messages = {}
@@ -33,16 +63,18 @@ class Messages:
 
     def save_message(self, msg):
         if msg.arbitration_id not in self.messages:
-            self.messages[msg.arbitration_id] = dict()
-            self.messages[msg.arbitration_id]['data'] = []
-            self.messages[msg.arbitration_id]['count'] = 0
+            self.messages[msg.arbitration_id] = Message()
             for i in range(len(msg.data)):
-                self.messages[msg.arbitration_id]['data'].append(set())
+                self.messages[msg.arbitration_id].data.append(set())
 
-        self.messages[msg.arbitration_id]['count'] += 1
+        if len(msg.data) > len(self.messages[msg.arbitration_id].data):
+            for i in range(len(msg.data)-len(self.messages[msg.arbitration_id].data)):
+                self.messages[msg.arbitration_id].data.append(set())
+
+        self.messages[msg.arbitration_id].count += 1
         data = bytes(msg.data)
         for i in range(len(data)):
-            self.messages[msg.arbitration_id]['data'][i].add(data[i])
+            self.messages[msg.arbitration_id].data[i].add(data[i])
 
     def import_messages(self, filename):
         for msg in can.CanutilsLogReader(filename):

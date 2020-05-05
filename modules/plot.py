@@ -28,7 +28,7 @@ def run(candy):
         for i in range(len(plot_data["data"][0])):
             lines.extend(ax.plot(plot_data["time"], [row[i] for row in plot_data["data"]], label=i))
 
-        ax.set_title(f"Message { msg_id }")
+        ax.set_title(f"Message { hex(msg_id) }")
         ax.minorticks_off()
         leg = ax.legend()
         leg.get_frame().set_alpha(0.8)

@@ -126,3 +126,4 @@ class Bus():
         except:
             ("Something went wrong with CANvas")
         return self.nodes
+

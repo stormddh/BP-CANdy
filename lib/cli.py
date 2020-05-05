@@ -64,19 +64,21 @@ class CandyCLI(cmd.Cmd):
             msg = self.candy_API.get_messages(int(arg, 16))
             if msg:
                 print(f"ID: { int(arg, 16) }")
-                print(f"Count: { msg['count'] }")
+                if msg.label:
+                    print(f"Label: { msg.label }")
+                print(f"Count: { msg.count }")
                 print("Signals:")
-                for num, field in enumerate(msg['data']):
+                for num, field in enumerate(msg.data):
                     print(f"{ num }: { sorted(field) }")
             else:
                 print("Message not found")
         else:
             messages = self.candy_API.get_messages()
-            print("ID (message count)")
-            print("=================")
+            print("ID (message count)\tlabel")
+            print("=========================")
             for m in sorted(messages.keys()):
-                print(f"{ hex(m) } ({ messages[m]['count'] })")
-            print("=================")
+                print(f"{ hex(m) } ({ messages[m].count })\t{ messages[m].label }")
+            print("=========================")
             print(f"{ len(messages.keys()) } unique IDs")
 
     def do_send(self, arg):
@@ -133,6 +135,22 @@ class CandyCLI(cmd.Cmd):
                 print("Number out of range")
         except ValueError:
             print("No module selected")
+
+    def do_label(self, arg):
+        """Set label for a message"""
+        args = parse(arg)
+        if len(args) == 2:
+            self.candy_API.label_message(int(args[0], 16), args[1])
+
+    def do_nodes(self, arg):
+        """Find and list nodes using CANvas"""
+        if arg == "find":
+            nodes = self.candy_API.find_nodes()
+        else:
+            nodes = self.candy_API.get_nodes()
+
+        if not len(nodes):
+            print("No nodes have been found yet")
 
     def do_quit(self, arg):
         "Stop recording and close the candy CLI"

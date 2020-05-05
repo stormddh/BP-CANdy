@@ -1,2 +1,4 @@
 python-can
 cantools
+matplotlib
+pyqt5

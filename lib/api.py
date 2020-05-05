@@ -89,6 +89,12 @@ class API:
         else:
             print("Missing definitions")
 
+    def label_message(self, msg_id, label):
+        if msg_id in self.db.messages:
+            self.db.messages[msg_id].label = label
+        else:
+            print("Message not found")
+
     def set_filter_rule(self, msg_id, mask, extended=False):
         rule = { "can_id" : msg_id,
                  "can_mask" : mask,
@@ -103,7 +109,7 @@ class API:
         self.bus.filter_rules.clear()
 
     def get_nodes(self):
-        return self.bus.nodes()
+        return self.bus.nodes
 
     def find_nodes(self):
         if self.bus:
