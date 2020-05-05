@@ -8,12 +8,11 @@ def run(candy):
 
     # print only messages with ID 10 (HEX)
     filter_id = 0x10
-    filter_mask = 0xFF
+    filter_mask = 0xFFFFF
     candy.set_filter_rule(filter_id, filter_mask)
 
     while True:
         filter_id = input("Set message ID filter (hex): ")
-        filter_mask = 0xFF
         candy.set_filter_rule(int(filter_id, 16), filter_mask)
         print("Filter:", filter_id, filter_mask)
         user = input("end or reset? ")

@@ -12,7 +12,7 @@ def run(candy):
     user_input = input("Message ID: ")
     msg_id = int(user_input, 16)
     if msg_id and msg_id in candy.get_messages():
-        idx = input(f"Signal field(0-{ len(candy.get_messages(msg_id).data) }): ")
+        idx = input(f"Signal field(0-{ len(candy.get_messages(msg_id).data)-1 }): ")
         # Create figure for plotting
         fig, ax = plt.subplots()
         xs = []
