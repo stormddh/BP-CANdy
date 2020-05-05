@@ -1,6 +1,13 @@
 ## CANdy - Automated tool for CAN bus message mapping
 Last edit: 04-20-2020
 
+Requirements:
+  - Python 3
+  - Qt5 (Debian: qt5-default) 
+  - Python venv (Debian: (python-virtualenv)
+  
+Install these packages to your system before running CANdy install script.
+
 ### Install and run app with virtual CAN interface
 ```sh
 $ ./setup.sh                    # Initialize project with setup.sh
@@ -9,10 +16,15 @@ $ source __venv/bin/activate    # Activate Python virtual environment
 $ python3 ./candy_app           # Run application
 ```
 
+### When pulling a new version, be sure that all Python requirements are installed.
+```
+$ source __venv/bin/activate    # Activate Python virtual environment
+$ pip install -r requirements.txt
+```
 In different terminal, you can use `cansend` utility to send messages to vcan0 interface to as an external message source.
 
 ### Modules
-You can write your own modules using framework API. Store modules in *modules/* directory to be loaded by the main application. There is template in *misc/* directory for you to use.  
+You can write your own modules using framework API. Store modules in *modules/* directory to be loaded by the main application. There is template in *misc/* directory for you to use.
 
 ### Setup CAN interface manually with SocketCAN
   1. `dmesg` - to check presence of the CAN device in the computer
