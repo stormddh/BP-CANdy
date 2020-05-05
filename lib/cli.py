@@ -44,7 +44,6 @@ class CandyCLI(cmd.Cmd):
 
     @candy_API.setter
     def candy_API(self, value):
-        print("I was set!")
         self._candy_API = value
 
     @property
@@ -73,9 +72,10 @@ class CandyCLI(cmd.Cmd):
                 print("Message not found")
         else:
             messages = self.candy_API.get_messages()
-            for m in messages.keys():
-                #print(messages[m])
-                print(f"ID: { hex(m) } ({ messages[m]['count'] })")
+            print("ID (message count)")
+            print("=================")
+            for m in sorted(messages.keys()):
+                print(f"{ hex(m) } ({ messages[m]['count'] })")
             print("=================")
             print(f"{ len(messages.keys()) } unique IDs")
 
@@ -109,6 +109,8 @@ class CandyCLI(cmd.Cmd):
             print("Missing arguments")
             return
         self.candy_core.db.import_definitions(args[0])
+        if self.candy_core.db.definitions:
+            print(f"Imported { len(self.candy_core.db.definitions.messages) } definitions")
 
     def do_mod(self, arg):
         """mod <name:optional>- Run user module or list available modules"""

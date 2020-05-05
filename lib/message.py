@@ -29,7 +29,7 @@ class Messages:
 
     @import_file.setter
     def import_file(self, value):
-        self.self._import_file = value
+        self._import_file = value
 
     def save_message(self, msg):
         if msg.arbitration_id not in self.messages:
@@ -49,7 +49,12 @@ class Messages:
             save_message(msg)
 
     def import_definitions(self, filename):
-        self.definitions = cantools.database.load_file(filename)
+        try:
+            self.definitions = cantools.database.load_file(filename)
+        except UnsupportedDatabaseFormatError:
+            print("Unsupported database error")
+        except:
+            print("Could not import definitions")
 
     def decode_message(self, msg_id, msg_data):
         return self.definitions.decode_message(msg_id, msg_data)

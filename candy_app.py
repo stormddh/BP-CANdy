@@ -21,4 +21,8 @@ if not (args.interface or args.log):
     print("Missing arguments")
     sys.exit(1)
 
-CandyCLI(args).cmdloop()
+try:
+    CandyCLI(args).cmdloop()
+except OSError as o:
+    print("Cannot start CANdy:", o)
+    sys.exit(1)

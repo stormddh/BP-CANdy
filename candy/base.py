@@ -12,6 +12,7 @@ class Core:
         self._modules = []
         self._db = Messages()
         self._bus = None
+        self._online = False
 
     @property
     def modules(self):
@@ -37,6 +38,14 @@ class Core:
     def bus(self, value):
         self._bus = value
 
+    @property
+    def online(self):
+        return self._online
+
+    @online.setter
+    def online(self, value):
+        self._online = value
+
     def can_monitor(self, interface, bitrate, user_callback=[]):
         print(f"Starting monitoring session on { interface }")
         callback = [ self.db.save_message ]
@@ -51,20 +60,20 @@ class Core:
         )
         worker.start()
 
+        self.online = True
+
     def can_offline(self, log_file):
-        print(">> Importing data")
+        print("Importing data")
+        #try:
         log_data = CanutilsLogReader(log_file)
+        self.bus = Bus(None, 0)
+        self.bus.history = log_data
 
         for msg in log_data:
             self.db.save_message(msg)
-        for msg in sorted(self.db.messages):
-            print("ID: ", msg)
-            for i in self.db.messages[msg]:
-                if len(self.db.messages[msg][i]):
-                    print(i, self.db.messages[msg][i], "; ", end="")
-            print()
-
         self.db.import_file = log_file
+        #except:
+        #    print("Import was not successful")
 
     def find_plugin(self):
         self.modules = [

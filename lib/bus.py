@@ -7,12 +7,15 @@ from datetime import datetime
 
 class Bus():
     def __init__(self, interface, br):
-        self._can_bus = can.ThreadSafeBus(
-            bustype="socketcan",
-            channel=interface,
-            bitrate=br,
-            receive_own_messages=True,
-        )
+        if interface:
+            self._can_bus = can.ThreadSafeBus(
+                bustype="socketcan",
+                channel=interface,
+                bitrate=br,
+                receive_own_messages=True,
+            )
+        else:
+            self._can_bus = None
         self._filter_rules = []
         self._nodes = []
         self._history = []
@@ -55,34 +58,6 @@ class Bus():
     def notifier(self, value):
         self._notifier = value
 
-    def send_message(self, msg_id, msg_data):
-        try:
-            msg = can.Message(arbitration_id=msg_id, data=msg_data)
-            self.can_bus.send(msg)
-            print(">> Message sent on {}".format(self.can_bus.channel_info))
-        except can.CanError:
-            print(">> Message NOT sent")
-
-    def send_message_periodic(self, msg_id, msg_data, period, limit):
-        msg = can.Message(arbitration_id=msg_id, data=msg_data)
-
-        try:
-            if limit:
-                print("Limit: ", limit)
-                task = self.can_bus.send_periodic(msg, period, store_task=True)
-                if not isinstance(task, can.LimitedDurationCyclicSendTaskABC):
-                    task.stop()
-                    return
-                time.sleep(limit)
-                task.stop()
-            else:
-                # make asynchronous
-                task = self.can_bus.send_periodic(msg, period, store_task=False)
-                time.sleep(10)
-                task.stop()
-        except can.CanError:
-            print(">> Message NOT sent")
-
     async def listen(self, callback):
         reader = can.AsyncBufferedReader()
         logger = can.Logger(f"log/{datetime.now().isoformat(timespec='seconds')}.log")
@@ -116,6 +91,34 @@ class Bus():
         print('Exiting...')
         self.notifier.stop()
         self.can_bus.shutdown()
+
+    def send_message(self, msg_id, msg_data):
+        try:
+            msg = can.Message(arbitration_id=msg_id, data=msg_data)
+            self.can_bus.send(msg)
+            print(">> Message sent on {}".format(self.can_bus.channel_info))
+        except can.CanError:
+            print(">> Message NOT sent")
+
+    def send_message_periodic(self, msg_id, msg_data, period, limit):
+        msg = can.Message(arbitration_id=msg_id, data=msg_data)
+
+        try:
+            if limit:
+                print("Limit: ", limit)
+                task = self.can_bus.send_periodic(msg, period, store_task=True)
+                if not isinstance(task, can.LimitedDurationCyclicSendTaskABC):
+                    task.stop()
+                    return
+                time.sleep(limit)
+                task.stop()
+            else:
+                # make asynchronous
+                task = self.can_bus.send_periodic(msg, period, store_task=False)
+                time.sleep(10)
+                task.stop()
+        except can.CanError:
+            print(">> Message NOT sent")
 
     def find_nodes(self, file_name):
         try:

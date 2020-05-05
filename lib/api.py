@@ -4,6 +4,7 @@ class API:
     def __init__(self, core):
         self._db = core.db
         self._bus = core.bus
+        self._online = core.online
 
         if self.bus:
             self._history_iter = iter(self._bus.history)
@@ -26,6 +27,10 @@ class API:
     def history_iter(self, value):
         self._history_iter = value
 
+    @property
+    def online(self):
+        return self._online
+
     def create_data(self, msg):
         return [int(x, 16) for x in msg]
 
@@ -47,23 +52,36 @@ class API:
         else:
             return self.db.messages
 
-    def get_message_log(self, msg_id):
+    def get_message_log(self, msg_id, last=None):
         result = []
+        #this could be faster
         for m in self._bus.history:
             if m.arbitration_id == msg_id:
                 result.append(m)
 
-        return result
+        if last:
+            return result[-last:]
+        else:
+            return result
 
     def send_message(self, msg_id, msg_data):
-        self.bus.send_message(msg_id, self.create_data(msg_data))
+        if self.online:
+            self.bus.send_message(msg_id, self.create_data(msg_data))
+        else:
+            print("No active interface")
 
     def send_periodic_time(self, msg_id, msg_data, period, limit=0):
-        self.bus.send_message_periodic(msg_id, self.create_data(msg_data), period, limit)
+        if self.online:
+            self.bus.send_message_periodic(msg_id, self.create_data(msg_data), period, limit)
+        else:
+            print("No active interface")
 
     def send_periodic_count(self, msg_id, msg_data, period, number):
-        limit = period * number
-        self.bus.send_message_periodic(msg_id, self.create_data(msg_data), period, limit)
+        if self.online:
+            limit = period * number
+            self.bus.send_message_periodic(msg_id, self.create_data(msg_data), period, limit)
+        else:
+            print("No active interface")
 
     def decode_message(self, msg):
         if self.db.definitions:
@@ -96,5 +114,3 @@ class API:
                     out += f"{m.timestamp} {m.channel} {m.arbitration_id}#\n"
                 fp.write(out)
             return self.bus.find_nodes(file_name)
-
-# TODO: finish API methods
