@@ -1,4 +1,5 @@
 import cmd
+import re
 
 from candy.base import Core
 from lib.api import API
@@ -54,12 +55,24 @@ class CandyCLI(cmd.Cmd):
     def interface(self, value):
         self._interface = value
 
+    def check_arg(self, args):
+        regex_hex = re.compile("^[a-fA-F\d]+$")
+        for arg in args:
+            if not regex_hex.match(arg):
+                print("Argument has invalid value")
+                return False
+
+        return True
+
     # ----- basic commands -----
     def emptyline(self):
         pass
 
     def do_get(self, arg):
         """get <id:optional> - List all received messages or one message with details"""
+        if not self.check_arg([arg]):
+            return
+
         if arg:
             msg = self.candy_API.get_messages(int(arg, 16))
             if msg:
@@ -84,9 +97,13 @@ class CandyCLI(cmd.Cmd):
     def do_send(self, arg):
         """send <id> <data> - Send a CAN message (use HEX values)"""
         args = parse(arg)
+
         if not args:
             print("Missing arguments")
             return
+        elif not self.check_arg(args):
+            return
+
         self.candy_API.send_message(int(args[0], 16), args[1])
 
     def do_filter(self, arg):
@@ -97,7 +114,7 @@ class CandyCLI(cmd.Cmd):
                 print(f"CAN ID: { hex(f['can_id']) }, MASK: { hex(f['can_mask']) }")
         elif args[0] == "reset":
             self.candy_API.reset_filter()
-        else:
+        elif self.check_arg(args):
             if len(args) > 1:
                 mask = int(args[1], 16)
             else:
@@ -106,13 +123,16 @@ class CandyCLI(cmd.Cmd):
 
     def do_import(self, arg):
         """import <file> - Import CAN message definitions"""
-        args = parse(arg)
-        if not args:
-            print("Missing arguments")
+        if not arg:
+            print("Missing argument")
             return
-        self.candy_core.db.import_definitions(args[0])
-        if self.candy_core.db.definitions:
-            print(f"Imported { len(self.candy_core.db.definitions.messages) } definitions")
+
+        try:
+            self.candy_core.db.import_definitions(args[0])
+            if self.candy_core.db.definitions:
+                print(f"Imported { len(self.candy_core.db.definitions.messages) } definitions")
+        except:
+            print("Import was not successful")
 
     def do_mod(self, arg):
         """mod <name:optional>- Run user module or list available modules"""
