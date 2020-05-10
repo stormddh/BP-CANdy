@@ -13,6 +13,9 @@ class Core:
         self._db = Messages()
         self._bus = None
         self._online = False
+        self._verbose = False
+
+    # verbose switch on/offs
 
     @property
     def modules(self):
@@ -46,9 +49,28 @@ class Core:
     def online(self, value):
         self._online = value
 
+    @property
+    def verbose(self):
+        return self._verbose
+
+    @verbose.setter
+    def verbose(self, value):
+        self._verbose = value
+
+    def my_print(self, msg):
+        if self.verbose:
+            if self.db.definitions:
+                try:
+                    decoded = self.db.decode_message(msg.arbitration_id, msg.data)
+                    print(f"CANDY: T: { msg.timestamp } { hex(msg.arbitration_id) } { decoded }")
+                except:
+                    print(f"CANDY: { msg }")
+            else:
+                print(f"CANDY: { msg }")
+
     def can_monitor(self, interface, bitrate, user_callback=[]):
         print(f"Starting monitoring session on { interface }")
-        callback = [ self.db.save_message ]
+        callback = [ self.db.save_message, self.my_print ]
         callback.extend(user_callback)
         self.bus = Bus(interface, bitrate)
 
@@ -64,16 +86,18 @@ class Core:
 
     def can_offline(self, log_file):
         print("Importing data")
-        #try:
-        log_data = CanutilsLogReader(log_file)
-        self.bus = Bus(None, 0)
-        self.bus.history = log_data
 
-        for msg in log_data:
-            self.db.save_message(msg)
-        self.db.import_file = log_file
-        #except:
-        #    print("Import was not successful")
+        try:
+            log_data = CanutilsLogReader(log_file)
+            self.bus = Bus(None, 0)
+            self.bus.history = log_data
+
+            for msg in log_data:
+                self.db.save_message(msg)
+
+            self.db.import_file = log_file
+        except Exception as e:
+            print(f"Import was not successful: { e }")
 
     def find_plugin(self):
         self.modules = [

@@ -18,11 +18,7 @@ class CandyCLI(cmd.Cmd):
             else:
                 bitrate = 500000
 
-            if not args.quiet:
-                self.candy_core.can_monitor(args.interface, bitrate, [ my_print ])
-            else:
-                self.candy_core.can_monitor(args.interface, bitrate)
-
+            self.candy_core.can_monitor(args.interface, bitrate)
             self.interface = True
 
         if args.log:
@@ -68,30 +64,64 @@ class CandyCLI(cmd.Cmd):
     def emptyline(self):
         pass
 
+    def do_monitor(self, arg):
+        """Print out messages received from the CAN interface"""
+        input("Press 'Enter' to start, then write 'q' to quit")
+        self.candy_core.verbose = True
+        print("\033[2J\033[;H")
+        while True:
+            command = input()
+            if command == "q":
+                self.candy_core.verbose = False
+                break
+
     def do_get(self, arg):
         """get <id:optional> - List all received messages or one message with details"""
-        if not self.check_arg([arg]):
-            return
-
         if arg:
-            msg = self.candy_API.get_messages(int(arg, 16))
+            if not self.check_arg([arg]):
+                return
+
+            msg_id = int(arg, 16)
+            msg = self.candy_API.get_messages(msg_id)
+
             if msg:
-                print(f"ID: { int(arg, 16) }")
+                print(f"ID: { hex(msg_id) }")
                 if msg.label:
                     print(f"Label: { msg.label }")
                 print(f"Count: { msg.count }")
-                print("Signals:")
+                print("Recorded signals:")
+
                 for num, field in enumerate(msg.data):
                     print(f"{ num }: { sorted(field) }")
+
+                if self.candy_API.db.definitions:
+                    try:
+                        msg_def = self.candy_API.db.definitions.get_message_by_frame_id(msg_id)
+                        print(f"Name: { msg_def.name }")
+                        print(f"Signals:")
+                        for s in msg_def.signals:
+                            print(s)
+                        print(msg_def.layout_string())
+                    except:
+                        pass
             else:
                 print("Message not found")
         else:
             messages = self.candy_API.get_messages()
-            print("ID (message count)\tlabel")
-            print("=========================")
-            for m in sorted(messages.keys()):
-                print(f"{ hex(m) } ({ messages[m].count })\t{ messages[m].label }")
-            print("=========================")
+            print("Name - ID - (message count) - changed - definition name - label")
+            print("==============================================================")
+
+            for m_id, m_val in sorted(messages.items()):
+                change = "!!" if m_val.changed else ""
+                name = ""
+                if self.candy_API.db.definitions:
+                    try:
+                        name = self.candy_API.db.definitions.get_message_by_frame_id(m_id).name
+                    except:
+                        pass
+                print(f"{ hex(m_id) } ({ m_val.count }) \033[33m{ change }\033[0m\t{ name }\t{ m_val.label }")
+
+            print("==============================================================")
             print(f"{ len(messages.keys()) } unique IDs")
 
     def do_send(self, arg):
@@ -127,8 +157,9 @@ class CandyCLI(cmd.Cmd):
             print("Missing argument")
             return
 
+        #try:
+        self.candy_core.db.import_definitions(arg)
         try:
-            self.candy_core.db.import_definitions(args[0])
             if self.candy_core.db.definitions:
                 print(f"Imported { len(self.candy_core.db.definitions.messages) } definitions")
         except:
@@ -182,6 +213,3 @@ class CandyCLI(cmd.Cmd):
 def parse(arg):
     "Convert a series of zero or more numbers to an argument tuple"
     return tuple(arg.split())
-
-def my_print(msg):
-    print("CANDY: ", msg)

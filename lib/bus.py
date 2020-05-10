@@ -60,7 +60,7 @@ class Bus():
 
     async def listen(self, callback):
         reader = can.AsyncBufferedReader()
-        logger = can.Logger(f"log/{datetime.now().isoformat(timespec='seconds')}.log")
+        logger = can.Logger(f"log/{ datetime.now().isoformat(timespec='seconds') }.log")
 
         # Set up listeners and add callback functions
         listeners = [
@@ -96,7 +96,7 @@ class Bus():
         try:
             msg = can.Message(arbitration_id=msg_id, data=msg_data)
             self.can_bus.send(msg)
-            print(">> Message sent on {}".format(self.can_bus.channel_info))
+            print(f">> Message sent on { self.can_bus.channel_info }")
         except can.CanError:
             print(">> Message NOT sent")
 
@@ -105,7 +105,7 @@ class Bus():
 
         try:
             if limit:
-                print("Limit: ", limit)
+                print(f"Limit: { limit }")
                 task = self.can_bus.send_periodic(msg, period, store_task=True)
                 if not isinstance(task, can.LimitedDurationCyclicSendTaskABC):
                     task.stop()
@@ -123,6 +123,7 @@ class Bus():
     def find_nodes(self, file_name):
         try:
             self.nodes = canvas.mapper(file_name)
+            print(self.nodes)
         except:
             ("Something went wrong with CANvas")
         return self.nodes

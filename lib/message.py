@@ -1,11 +1,14 @@
 import can
 import cantools
 
+from copy import deepcopy
+
 class Message:
     def __init__(self):
         self._count = 0
         self._data = []
         self._label = ""
+        self._changed = False
 
     @property
     def count(self):
@@ -30,6 +33,25 @@ class Message:
     @label.setter
     def label(self, value):
         self._label = value
+
+    @property
+    def changed(self):
+        return self._changed
+
+    @changed.setter
+    def changed(self, value):
+        self._changed = value
+
+    def update_signals(self, data):
+        old_data = deepcopy(self.data)
+
+        for i in range(len(data)):
+            self.data[i].add(data[i])
+
+        if old_data == self.data:
+            self.changed = False
+        else:
+            self.changed = True
 
 class Messages:
     def __init__(self):
@@ -67,14 +89,14 @@ class Messages:
             for i in range(len(msg.data)):
                 self.messages[msg.arbitration_id].data.append(set())
 
-        if len(msg.data) > len(self.messages[msg.arbitration_id].data):
-            for i in range(len(msg.data)-len(self.messages[msg.arbitration_id].data)):
-                self.messages[msg.arbitration_id].data.append(set())
+        message = self.messages[msg.arbitration_id]
 
-        self.messages[msg.arbitration_id].count += 1
-        data = bytes(msg.data)
-        for i in range(len(data)):
-            self.messages[msg.arbitration_id].data[i].add(data[i])
+        if len(msg.data) > len(message.data):
+            for i in range(len(msg.data)-len(message.data)):
+                message.data.append(set())
+
+        message.count += 1
+        message.update_signals(bytes(msg.data))
 
     def import_messages(self, filename):
         for msg in can.CanutilsLogReader(filename):
@@ -83,10 +105,8 @@ class Messages:
     def import_definitions(self, filename):
         try:
             self.definitions = cantools.database.load_file(filename)
-        except UnsupportedDatabaseFormatError:
-            print("Unsupported database error")
-        except:
-            print("Could not import definitions")
+        except Exception as e:
+            print(f"Could not import definitions: { e }")
 
     def decode_message(self, msg_id, msg_data):
         return self.definitions.decode_message(msg_id, msg_data)
