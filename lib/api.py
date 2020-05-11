@@ -96,6 +96,8 @@ class API:
             print("Message not found")
 
     def set_filter_rule(self, msg_id, mask, extended=False):
+        # CAN ID filter - using hexadecimal values
+        # http://www.cse.dmu.ac.uk/~eg/tele/CanbusIDandMask.html
         rule = { "can_id" : msg_id,
                  "can_mask" : mask,
                  "extended" : extended,

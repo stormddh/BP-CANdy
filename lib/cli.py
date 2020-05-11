@@ -108,8 +108,8 @@ class CandyCLI(cmd.Cmd):
                 print("Message not found")
         else:
             messages = self.candy_API.get_messages()
-            print("Name - ID - (message count) - changed - definition name - label")
-            print("==============================================================")
+            print("ID - (message count) - changed - definition name - label")
+            print("==========================================================")
 
             for m_id, m_val in sorted(messages.items()):
                 change = "!!" if m_val.changed else ""
@@ -121,7 +121,7 @@ class CandyCLI(cmd.Cmd):
                         pass
                 print(f"{ hex(m_id) } ({ m_val.count }) \033[33m{ change }\033[0m\t{ name }\t{ m_val.label }")
 
-            print("==============================================================")
+            print("==========================================================")
             print(f"{ len(messages.keys()) } unique IDs")
 
     def do_send(self, arg):

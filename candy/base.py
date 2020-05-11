@@ -90,9 +90,9 @@ class Core:
         try:
             log_data = CanutilsLogReader(log_file)
             self.bus = Bus(None, 0)
-            self.bus.history = log_data
 
             for msg in log_data:
+                self.bus.history.append(msg)
                 self.db.save_message(msg)
 
             self.db.import_file = log_file
