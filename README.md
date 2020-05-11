@@ -1,5 +1,5 @@
 ## CANdy - Automated tool for CAN bus message mapping
-Last edit: 04-20-2020
+Last edit: 05-11-2020
 
 Requirements:
   - Python 3
