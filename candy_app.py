@@ -22,6 +22,9 @@ if not (args.interface or args.log):
 
 try:
     CandyCLI(args).cmdloop()
+except KeyboardInterrupt:
+    print("Quitting CANdy")
+    sys.exit(1)
 except OSError as o:
     print("Cannot start CANdy:", o)
     sys.exit(1)

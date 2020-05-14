@@ -96,9 +96,9 @@ class Bus():
         try:
             msg = can.Message(arbitration_id=msg_id, data=msg_data)
             self.can_bus.send(msg)
-            print(f">> Message sent on { self.can_bus.channel_info }")
+            print(f"Message sent on { self.can_bus.channel_info }")
         except can.CanError:
-            print(">> Message NOT sent")
+            print("Message NOT sent")
 
     def send_message_periodic(self, msg_id, msg_data, period, limit):
         msg = can.Message(arbitration_id=msg_id, data=msg_data)
@@ -118,7 +118,7 @@ class Bus():
                 time.sleep(10)
                 task.stop()
         except can.CanError:
-            print(">> Message NOT sent")
+            print("Message NOT sent")
 
     def find_nodes(self, file_name):
         try:

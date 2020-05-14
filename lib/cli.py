@@ -108,7 +108,7 @@ class CandyCLI(cmd.Cmd):
                 print("Message not found")
         else:
             messages = self.candy_API.get_messages()
-            print("ID - (message count) - changed - definition name - label")
+            print("ID\t|count\t|changed\t|label\t|name")
             print("==========================================================")
 
             for m_id, m_val in sorted(messages.items()):
@@ -119,7 +119,7 @@ class CandyCLI(cmd.Cmd):
                         name = self.candy_API.db.definitions.get_message_by_frame_id(m_id).name
                     except:
                         pass
-                print(f"{ hex(m_id) } ({ m_val.count }) \033[33m{ change }\033[0m\t{ name }\t{ m_val.label }")
+                print(f"{ hex(m_id) }\t({ m_val.count })\t\033[33m{ change }\033[0m\t\t{ m_val.label }\t{ name }")
 
             print("==========================================================")
             print(f"{ len(messages.keys()) } unique IDs")
@@ -128,7 +128,7 @@ class CandyCLI(cmd.Cmd):
         """send <id> <data> - Send a CAN message (use HEX values)"""
         args = parse(arg)
 
-        if not args:
+        if len(args) != 2:
             print("Missing arguments")
             return
         elif not self.check_arg(args):

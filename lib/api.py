@@ -32,7 +32,8 @@ class API:
         return self._online
 
     def create_data(self, msg):
-        return [int(x, 16) for x in msg]
+        split = [msg[i:i+2] for i in range(0, len(msg), 2)]
+        return [int(x, 16) for x in split]
 
     def read(self):
         try:
@@ -59,29 +60,35 @@ class API:
             if m.arbitration_id == msg_id:
                 result.append(m)
 
-        if last:
+        if last and last < len(result):
             return result[-last:]
         else:
             return result
 
     def send_message(self, msg_id, msg_data):
-        if self.online:
+        if not (len(msg_data) <= 16 and msg_id <= 0x7FF):
+            print("ID must be max 0x7FF and message can be long at most 8 bytes.")
+        elif self.online:
             self.bus.send_message(msg_id, self.create_data(msg_data))
         else:
-            print("No active interface")
+            print("Cannot send message")
 
     def send_periodic_time(self, msg_id, msg_data, period, limit=0):
-        if self.online:
+        if not (len(msg_data) <= 16 and msg_id <= 0x7FF):
+            print("ID must be max 0x7FF and message can be long at most 8 bytes.")
+        elif self.online:
             self.bus.send_message_periodic(msg_id, self.create_data(msg_data), period, limit)
         else:
-            print("No active interface")
+            print("Cannot send message")
 
     def send_periodic_count(self, msg_id, msg_data, period, number):
-        if self.online:
+        if not (len(msg_data) <= 16 and msg_id <= 0x7FF):
+            print("Highest possible ID is 0x7FF and message can be long at most 8 bytes.")
+        elif self.online:
             limit = period * number
             self.bus.send_message_periodic(msg_id, self.create_data(msg_data), period, limit)
         else:
-            print("No active interface")
+            print("Cannot send message")
 
     def decode_message(self, msg):
         if self.db.definitions:
@@ -98,13 +105,20 @@ class API:
     def set_filter_rule(self, msg_id, mask, extended=False):
         # CAN ID filter - using hexadecimal values
         # http://www.cse.dmu.ac.uk/~eg/tele/CanbusIDandMask.html
-        rule = { "can_id" : msg_id,
-                 "can_mask" : mask,
-                 "extended" : extended,
-            }
+        if msg_id <= 0x7FF and mask <= 0x1FFFFFFF:
+            rule = { "can_id" : msg_id,
+                     "can_mask" : mask,
+                     "extended" : extended,
+                }
+        else:
+            print("Invalid argument values")
+            return
+
         if rule not in self.bus.filter_rules:
             self.bus.filter_rules.append(rule)
         self.bus.can_bus.set_filters(self.bus.filter_rules)
+
+        return self.bus.filter_rules
 
     def reset_filter(self):
         self.bus.can_bus.set_filters(None)
