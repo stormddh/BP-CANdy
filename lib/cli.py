@@ -85,22 +85,24 @@ class CandyCLI(cmd.Cmd):
             msg = self.candy_API.get_messages(msg_id)
 
             if msg:
-                print(f"ID: { hex(msg_id) }")
+                print(f"ID: {msg_id:x}")
                 if msg.label:
-                    print(f"Label: { msg.label }")
-                print(f"Count: { msg.count }")
+                    print(f"Label: {msg.label}")
+                print(f"Count: {msg.count}")
                 print("Recorded signals:")
 
                 for num, field in enumerate(msg.data):
-                    print(f"{ num }: { sorted(field) }")
+                    print(f"{num}: {sorted(field)}")
 
                 if self.candy_API.db.definitions:
                     try:
                         msg_def = self.candy_API.db.definitions.get_message_by_frame_id(msg_id)
-                        print(f"Name: { msg_def.name }")
-                        print(f"Signals:")
+                        print(f"Name: {msg_def.name}")
+                        print("Signals:")
+                        print("=====================================")
                         for s in msg_def.signals:
-                            print(s)
+                            print(f"{s.name:<20} [{s.minimum}|{s.maximum}]\t{s.unit}")
+                        print("=====================================")
                         print(msg_def.layout_string())
                     except:
                         pass
@@ -108,21 +110,21 @@ class CandyCLI(cmd.Cmd):
                 print("Message not found")
         else:
             messages = self.candy_API.get_messages()
-            print("ID\t|count\t|changed\t|label\t|name")
+            print("  ID|\t count|\tperiod|label\t|name")
             print("==========================================================")
 
             for m_id, m_val in sorted(messages.items()):
-                change = "!!" if m_val.changed else ""
+                period = "N" if m_val.periodic == 0 else int(m_val.periodic * 1000)
                 name = ""
                 if self.candy_API.db.definitions:
                     try:
                         name = self.candy_API.db.definitions.get_message_by_frame_id(m_id).name
                     except:
                         pass
-                print(f"{ hex(m_id) }\t({ m_val.count })\t\033[33m{ change }\033[0m\t\t{ m_val.label }\t{ name }")
+                print(f"{m_id:>4x}\t{m_val.count:>6}{period:>8}\t\t{m_val.label}\t{name}")
 
             print("==========================================================")
-            print(f"{ len(messages.keys()) } unique IDs")
+            print(f"{len(messages.keys())} unique IDs")
 
     def do_send(self, arg):
         """send <id> <data> - Send a CAN message (use HEX values)"""
@@ -141,7 +143,7 @@ class CandyCLI(cmd.Cmd):
         args = parse(arg)
         if not args:
             for f in self.candy_API.bus.filter_rules:
-                print(f"CAN ID: { hex(f['can_id']) }, MASK: { hex(f['can_mask']) }")
+                print(f"CAN ID: {f['can_id']:x}, MASK: {f['can_mask']:x}")
         elif args[0] == "reset":
             self.candy_API.reset_filter()
         elif self.check_arg(args):
@@ -157,20 +159,20 @@ class CandyCLI(cmd.Cmd):
             print("Missing argument")
             return
 
-        #try:
-        self.candy_core.db.import_definitions(arg)
         try:
+            self.candy_core.db.import_definitions(arg)
+
             if self.candy_core.db.definitions:
-                print(f"Imported { len(self.candy_core.db.definitions.messages) } definitions")
-        except:
-            print("Import was not successful")
+                print(f"Imported {len(self.candy_core.db.definitions.messages)} definitions")
+        except Exception as e:
+            print("Import was not successful", e)
 
     def do_mod(self, arg):
-        """mod <name:optional>- Run user module or list available modules"""
+        """mod <name:optional> - Run user module or list available modules"""
         if not arg:
             print("Modules:")
             for number, name in enumerate(self.candy_core.modules, 1):
-                print(f"\t{ number } { name }")
+                print(f"\t{number} {name}")
             index = input("Choose module #: ")
         elif arg in self.candy_core.modules:
             self.candy_core.run_plugin(self.candy_core.modules.index(arg))
@@ -188,7 +190,7 @@ class CandyCLI(cmd.Cmd):
             print("No module selected")
 
     def do_label(self, arg):
-        """Set label for a message"""
+        """label <id> <label> - Set label for a message"""
         args = parse(arg)
         if len(args) == 2:
             self.candy_API.label_message(int(args[0], 16), args[1])

@@ -8,7 +8,9 @@ class Message:
         self._count = 0
         self._data = []
         self._label = ""
+        self._last = None
         self._changed = False
+        self._periodic = 0
 
     @property
     def count(self):
@@ -35,12 +37,28 @@ class Message:
         self._label = value
 
     @property
+    def last(self):
+        return self._last
+
+    @last.setter
+    def last(self, value):
+        self._last = value
+
+    @property
     def changed(self):
         return self._changed
 
     @changed.setter
     def changed(self, value):
         self._changed = value
+
+    @property
+    def periodic(self):
+        return self._periodic
+
+    @periodic.setter
+    def periodic(self, value):
+        self._periodic = value
 
     def update_signals(self, data):
         old_data = deepcopy(self.data)
@@ -95,6 +113,11 @@ class Messages:
             for i in range(len(msg.data)-len(message.data)):
                 message.data.append(set())
 
+        if message.last:
+            new = msg.timestamp - message.last.timestamp
+            message.periodic = (message.periodic * message.count + new) / (message.count + 1)
+
+        message.last = msg
         message.count += 1
         message.update_signals(bytes(msg.data))
 
