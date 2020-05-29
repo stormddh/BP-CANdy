@@ -113,7 +113,6 @@ class Bus():
                 time.sleep(limit)
                 task.stop()
             else:
-                # make asynchronous
                 task = self.can_bus.send_periodic(msg, period, store_task=False)
                 time.sleep(10)
                 task.stop()
@@ -127,4 +126,3 @@ class Bus():
         except:
             ("Something went wrong with CANvas")
         return self.nodes
-

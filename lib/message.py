@@ -9,7 +9,6 @@ class Message:
         self._data = []
         self._label = ""
         self._last = None
-        self._changed = False
         self._periodic = 0
 
     @property
@@ -45,14 +44,6 @@ class Message:
         self._last = value
 
     @property
-    def changed(self):
-        return self._changed
-
-    @changed.setter
-    def changed(self, value):
-        self._changed = value
-
-    @property
     def periodic(self):
         return self._periodic
 
@@ -61,15 +52,8 @@ class Message:
         self._periodic = value
 
     def update_signals(self, data):
-        old_data = deepcopy(self.data)
-
         for i in range(len(data)):
             self.data[i].add(data[i])
-
-        if old_data == self.data:
-            self.changed = False
-        else:
-            self.changed = True
 
 class Messages:
     def __init__(self):
@@ -102,6 +86,7 @@ class Messages:
         self._import_file = value
 
     def save_message(self, msg):
+        # Create a new message if it does not exist
         if msg.arbitration_id not in self.messages:
             self.messages[msg.arbitration_id] = Message()
             for i in range(len(msg.data)):
@@ -109,10 +94,7 @@ class Messages:
 
         message = self.messages[msg.arbitration_id]
 
-        if len(msg.data) > len(message.data):
-            for i in range(len(msg.data)-len(message.data)):
-                message.data.append(set())
-
+        # Estimate message interval
         if message.last:
             new = msg.timestamp - message.last.timestamp
             message.periodic = (message.periodic * message.count + new) / (message.count + 1)

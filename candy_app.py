@@ -20,6 +20,7 @@ if not (args.interface or args.log):
     print("Missing arguments")
     sys.exit(1)
 
+# Run CLI application
 try:
     CandyCLI(args).cmdloop()
 except KeyboardInterrupt:

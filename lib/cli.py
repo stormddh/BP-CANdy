@@ -196,11 +196,20 @@ class CandyCLI(cmd.Cmd):
             self.candy_API.label_message(int(args[0], 16), args[1])
 
     def do_nodes(self, arg):
-        """Find and list nodes using CANvas"""
+        """nodes 'find':optional - Find and list nodes using CANvas"""
         if arg == "find":
             nodes = self.candy_API.find_nodes()
         else:
             nodes = self.candy_API.get_nodes()
+            for n, val in enumerate(nodes):
+                print(f"{n}:")
+                for i in val:
+                    msg_id = int(i)
+                    if self.candy_core.db.definitions:
+                        msg = get_message_by_frame_id(frame_id)
+                        if msg:
+                            name = msg.name
+                    print(f"\t{msg_id:x} {name}")
 
         if not len(nodes):
             print("No nodes have been found yet")

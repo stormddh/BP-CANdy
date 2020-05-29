@@ -62,11 +62,11 @@ class Core:
             if self.db.definitions:
                 try:
                     decoded = self.db.decode_message(msg.arbitration_id, msg.data)
-                    print(f"CANDY: T: { msg.timestamp } { hex(msg.arbitration_id) } { decoded }")
+                    print(f"Timestamp: {msg.timestamp} {msg.arbitration_id:x} {decoded}")
                 except:
-                    print(f"CANDY: { msg }")
+                    print(f"{msg}")
             else:
-                print(f"CANDY: { msg }")
+                print(f"{msg}")
 
     def can_monitor(self, interface, bitrate, user_callback=[]):
         print(f"Starting monitoring session on { interface }")
