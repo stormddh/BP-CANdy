@@ -1,5 +1,4 @@
-VERSION ""
-
+CM_ "COPIED FROM https://github.com/commaai/opendbc/";
 
 NS_ :
     NS_DESC_
@@ -60,7 +59,7 @@ BO_ 180 SPEED: 8 XXX
  SG_ SPEED : 47|16@0+ (0.01,0) [0|250] "kph" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 353 DSU_SPEED: 8 XXX
+BO_ 353 DSU_SPEED: 7 XXX
  SG_ FORWARD_SPEED : 15|16@0- (0.00390625,-30) [0|255] "kph" XXX
 
 BO_ 452 ENGINE_RPM: 8 CGW
@@ -128,10 +127,11 @@ BO_ 835 ACC_CONTROL: 8 DSU
  SG_ DISTANCE : 20|1@0+ (1,0) [0|1] "" XXX
  SG_ MINI_CAR : 21|1@0+ (1,0) [0|1] "" XXX
  SG_ SET_ME_X3 : 19|4@0+ (1,0) [0|15] "" XXX
- SG_ SET_ME_1 : 30|1@0+ (1,0) [0|1] "" HCU
+ SG_ PERMIT_BRAKING : 30|1@0+ (1,0) [0|1] "" HCU
  SG_ RELEASE_STANDSTILL : 31|1@0+ (1,0) [0|1] "" HCU
  SG_ CANCEL_REQ : 24|1@0+ (1,0) [0|1] "" HCU
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+ SG_ ACCEL_CMD_ALT : 47|8@0- (0.05,0) [0|0] "m/s^2" XXX
 
 BO_ 836 PRE_COLLISION_2: 8 DSU
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|0] "" XXX
@@ -270,6 +270,41 @@ BO_ 1163 RSA3: 8 FCM
  SG_ OVSPVALH : 27|4@0+ (1,-5) [0|0] "" XXX
  SG_ TSRSPU : 33|2@0+ (1,0) [0|0] "" XXX
 
+CM_ SG_ 36 ACCEL_Y "unit is tbd";
+CM_ SG_ 36 YAW_RATE "verify";
+CM_ SG_ 36 STEERING_TORQUE "does not seem the steer torque, tbd";
+CM_ SG_ 37 STEER_FRACTION "1/15th of the signal STEER_ANGLE, which is 1.5 deg; note that 0x8 is never set";
+CM_ SG_ 37 STEER_RATE "factor is tbd";
+CM_ SG_ 466 ACCEL_NET "net acceleration produced by the system, given ACCEL_CMD, road grade and other factors";
+CM_ SG_ 467 SET_SPEED "43 kph are shown as 28mph, so conversion isnt perfect";
+CM_ SG_ 467 LOW_SPEED_LOCKOUT "in low speed lockout, system would always disengage below 28mph";
+CM_ SG_ 560 BRAKE_PRESSED "another brake pressed?";
+CM_ SG_ 608 STEER_TORQUE_DRIVER "driver torque";
+CM_ SG_ 608 STEER_OVERRIDE "set when driver torque exceeds a certain value";
+CM_ SG_ 614 ANGLE "set to measured angle when ipas control isn't active";
+CM_ SG_ 643 COUNTER "only used on cars that use this msg for cruise control";
+CM_ SG_ 643 BRAKE_STATUS "only used on cars that use this msg for cruise control";
+CM_ SG_ 643 PRECOLLISION_ACTIVE "set 0.5s before any braking";
+CM_ SG_ 835 ACCEL_CMD_ALT "Copy of main ACCEL_CMD, but across 8 bits instead of 16 bits like ACCEL_CMD. Unsure if only informational or has an effect. Likely informational as existing openpilot sets this to 0 and no loss of functionality observed. Originally 'AT_RAW' in leaked toyota_2017_ref_pt.dbc file.";
+CM_ SG_ 921 UI_SET_SPEED "set speed shown in UI with user set unit";
+CM_ SG_ 951 BRAKE_LIGHTS_ACC "brake lights when ACC commands decel";
+CM_ SG_ 1042 SET_ME_1 "unclear what this is, but it's always 1 in drive traces";
+CM_ SG_ 1042 REPEATED_BEEPS "recommended for fcw and other important alerts";
+CM_ SG_ 1161 SPDVAL1 "Numbers 0-199 is displayed, 200-254 displays circle without number and 255 is for no limit.";
+CM_ SG_ 1161 SYNCID1 "counter from 1 to f at 1 Hz";
+CM_ SG_ 1161 SPDVAL2 "conditional speed value 70";
+CM_ SG_ 1162 SGNNUMP "1 if SPDVAL1 is set, otherwise 0";
+CM_ SG_ 1162 SYNCID2 "counter from 1 to f at 1 Hz";
+CM_ SG_ 1163 TSREQPD "always 1";
+CM_ SG_ 1163 TSRMSW "always 1";
+CM_ SG_ 1163 OTSGNNTM "always 3";
+CM_ SG_ 1163 NTLVLSPD "always 3";
+CM_ SG_ 1163 OVSPNTM "always 3";
+CM_ SG_ 1163 OVSPVALL "-5 at start then 2 after 2 seconds";
+CM_ SG_ 1163 OVSPVALM "-5 at start then 5 after 2 seconds";
+CM_ SG_ 1163 OVSPVALH "-5 at start then 10 after 2 seconds";
+CM_ SG_ 1163 TSRSPU "always 1";
+
 VAL_ 466 CRUISE_STATE 8 "active" 7 "standstill" 1 "off";
 VAL_ 467 LOW_SPEED_LOCKOUT 2 "low speed locked" 1 "ok";
 VAL_ 614 STATE 3 "enabled" 1 "disabled";
@@ -319,3 +354,4 @@ CM_ SG_ 610 TYPE "seems 1 on Corolla, 0 on all others";
 VAL_ 956 GEAR 0 "D" 1 "S" 8 "N" 16 "R" 32 "P";
 VAL_ 610 IPAS_STATE 5 "override" 3 "enabled" 1 "disabled";
 VAL_ 610 LKA_STATE 25 "temporary_fault" 9 "temporary_fault2" 5 "active" 1 "standby";
+
