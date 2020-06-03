@@ -59,3 +59,6 @@ $ python3 ./candy_app.py -i vcan0                     # launch CANdy
 ```
 
 Another way to experiment with CANdy is to use [ICSim](https://github.com/zombieCraig/ICSim) simulator. Please follow usage instructions in the link.
+
+[DEMO](https://drive.google.com/file/d/1UDNLDrn9iLWXE1vykkcJvWqIhud5XX5X/view?usp=sharing) with ICSim
+
