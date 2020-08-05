@@ -1,30 +1,36 @@
 ## CANdy - Automated tool for CAN bus message mapping
-Last edit: 05-11-2020
+Last edit: 08-05-2020
+
+### Introduction
+This tool was created for a [bachelors thesis](https://dspace.cvut.cz/bitstream/handle/10467/88148/F8-BP-2020-Do-Duc%20Huy-thesis.pdf) at CTU Prague. During my research and development I was supervised by people from [Auxilium Cyber Security](https://www.auxiliumcybersec.com), who also gave me the idea for the project. Its main purpose is to make mapping of the CAN messages an easier and more automated task. Unlike other alternatives, we aimed for a simple, lightweight and open-source solution available to everyone interested in analyzing the CAN bus and its messages. Regarding the other CAN bus tools, there are lots of different applications or libraries and this is my attempt to combine them together into an extensive framework with all necessary capabilities.
+
+This tool uses [python-can](https://github.com/hardbyte/python-can) to establish and maintain connection to the CAN bus.
 
 Requirements:
   - Python 3
   - Qt5 (Debian: qt5-default) 
   - Python venv (Debian: python-virtualenv)
   
-Install these packages to your system before running CANdy install script.
+At this moment, we do not support Windows platform, therefore all instructions are meant for Linux based systems. Install these packages to your system before running CANdy install script.
 
 ### Install and run app with virtual CAN interface
 ```sh
-$ ./setup.sh                    # Initialize project with setup.sh
-$ sudo ./setup_vcan.sh          # Initialize vcan interface
-$ source __venv/bin/activate    # Activate Python virtual environment
-$ python3 ./candy_app           # Run application
+$ ./setup.sh                      # Initialize project with setup.sh
+$ sudo ./setup_vcan.sh            # Initialize vcan interface
+$ source __venv/bin/activate      # Activate Python virtual environment
+$ pip install -r requirements.txt # Install Python dependencies
+$ python3 ./candy_app             # Run the CLI application
 ```
-In different terminal, you can use `cansend` utility to send messages to vcan0 interface to as an external message source.
+In different terminal, you can use `cansend` utility to send messages to vcan0 interface as an external message source. For more information, enter `help` command to show basic functions provided in the application. 
 
 ### When pulling a new version, be sure that all Python requirements are installed.
-```
+```sh
 $ source __venv/bin/activate    # Activate Python virtual environment
 $ pip install -r requirements.txt
 ```
 
 ### Modules
-You can write your own modules using framework API. Store modules in *modules/* directory to be loaded by the main application. There is template in *misc/* directory for you to use. Please write you functionality in the `run` function using *candy* API object to call framework API methods.
+You can write your own modules using framework API. Store modules in *modules/* directory to be loaded by the main application. There is template in *misc/* directory for you to use. Please write your functionality in the `run` function using *candy* API object to call framework API methods.
 
 ### API
 Parameters marked with * are optional, message IDs message data and filters use hexadecimal values
@@ -62,3 +68,5 @@ Another way to experiment with CANdy is to use [ICSim](https://github.com/zombie
 
 [DEMO](https://drive.google.com/file/d/1UDNLDrn9iLWXE1vykkcJvWqIhud5XX5X/view?usp=sharing) with ICSim
 
+### Contribution
+Please share your modules or CAN logs from you car with us! Create a pull request to collaborate on the tool, so that others can benefit from our findings and efforts. Thank you!
